@@ -1,7 +1,6 @@
-Stock-Prediction/
-│
-├── app.py
-├── stock_open_model.pkl
-├── Stock_price.ipynb
-├── requirements.txt
-├── README.md
+streamlit
+yfinance
+pandas
+numpy
+scikit-learn
+ta
