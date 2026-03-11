@@ -1,4 +1,4 @@
-# 📈 AI-Based Stock Market Prediction & Trading Signal System
+# 📈 Stock Market Prediction & Trading Signal System
 
 An end-to-end **machine learning project** that analyzes historical stock market data, generates technical indicators, and predicts **Buy/Sell trading signals** using machine learning models.
 
