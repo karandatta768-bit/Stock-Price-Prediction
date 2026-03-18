@@ -1,0 +1,14 @@
+# Python cache
+__pycache__/
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Virtual environment
+.venv/
+
+# Model files (optional but recommended)
+*.pkl
+
+# System files
+.DS_Store
