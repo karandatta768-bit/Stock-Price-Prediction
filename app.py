@@ -186,24 +186,78 @@ if predict_button:
             st.metric("Predicted Signal", signal_text, "+ Signal" if prediction == 1 else "- Signal", delta_color=signal_color)
         
         st.markdown("---")
-        st.subheader(f"📈 {ticker} Interactive Price Chart")
+        st.subheader(f"📈 {ticker} Technical Analysis Charts")
         
-        fig = go.Figure(data=[go.Candlestick(
-            x=df.index,
-            open=df['Open'].squeeze(),
-            high=df['High'].squeeze(),
-            low=df['Low'].squeeze(),
-            close=df['Close'].squeeze(),
-            name=ticker
-        )])
-        fig.update_layout(
-            xaxis_title="Date",
-            yaxis_title="Price (USD)",
-            xaxis_rangeslider_visible=True,
-            template="plotly_dark",
-            margin=dict(l=0, r=0, t=30, b=0)
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        tab1, tab2, tab3, tab4 = st.tabs(["Price & Moving Averages", "RSI", "MACD", "Bollinger Bands"])
+        
+        with tab1:
+            fig_price = go.Figure(data=[go.Candlestick(
+                x=df.index,
+                open=df['Open'].squeeze(),
+                high=df['High'].squeeze(),
+                low=df['Low'].squeeze(),
+                close=df['Close'].squeeze(),
+                name="Candlestick"
+            )])
+            fig_price.add_trace(go.Scatter(x=df.index, y=df['MA_5'].squeeze(), mode='lines', name='MA 5', line=dict(color='orange')))
+            fig_price.add_trace(go.Scatter(x=df.index, y=df['MA_20'].squeeze(), mode='lines', name='MA 20', line=dict(color='blue')))
+            fig_price.update_layout(
+                xaxis_title="Date",
+                yaxis_title="Price (USD)",
+                xaxis_rangeslider_visible=False,
+                template="plotly_dark",
+                margin=dict(l=0, r=0, t=30, b=0),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            )
+            st.plotly_chart(fig_price, use_container_width=True)
+
+        with tab2:
+            fig_rsi = go.Figure()
+            fig_rsi.add_trace(go.Scatter(x=df.index, y=df['RSI'].squeeze(), mode='lines', name='RSI', line=dict(color='#a855f7')))
+            fig_rsi.add_hline(y=70, line_dash="dash", line_color="#ef4444", annotation_text="Overbought", annotation_position="top right")
+            fig_rsi.add_hline(y=30, line_dash="dash", line_color="#22c55e", annotation_text="Oversold", annotation_position="bottom right")
+            fig_rsi.update_layout(
+                xaxis_title="Date",
+                yaxis_title="RSI Value",
+                template="plotly_dark",
+                margin=dict(l=0, r=0, t=30, b=0)
+            )
+            st.plotly_chart(fig_rsi, use_container_width=True)
+
+        with tab3:
+            fig_macd = go.Figure()
+            fig_macd.add_trace(go.Scatter(x=df.index, y=df['MACD'].squeeze(), mode='lines', name='MACD', line=dict(color='#3b82f6')))
+            fig_macd.add_trace(go.Scatter(x=df.index, y=df['MACD_signal'].squeeze(), mode='lines', name='Signal Line', line=dict(color='#f59e0b')))
+            
+            # Add histogram
+            macd_hist = df['MACD'].squeeze() - df['MACD_signal'].squeeze()
+            colors = ['#22c55e' if val >= 0 else '#ef4444' for val in macd_hist]
+            fig_macd.add_trace(go.Bar(x=df.index, y=macd_hist, name='Histogram', marker_color=colors))
+            
+            fig_macd.update_layout(
+                xaxis_title="Date",
+                yaxis_title="MACD Value",
+                template="plotly_dark",
+                margin=dict(l=0, r=0, t=30, b=0),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            )
+            st.plotly_chart(fig_macd, use_container_width=True)
+            
+        with tab4:
+            fig_bb = go.Figure()
+            fig_bb.add_trace(go.Scatter(x=df.index, y=df['Close'].squeeze(), mode='lines', name='Close Price', line=dict(color='#f8fafc')))
+            
+            fig_bb.add_trace(go.Scatter(x=df.index, y=df['BB_high'].squeeze(), mode='lines', name='Upper Band', line=dict(color='rgba(239, 68, 68, 0.5)', dash='dash')))
+            fig_bb.add_trace(go.Scatter(x=df.index, y=df['BB_low'].squeeze(), mode='lines', name='Lower Band', line=dict(color='rgba(34, 197, 94, 0.5)', dash='dash'), fill='tonexty', fillcolor='rgba(255, 255, 255, 0.05)'))
+            
+            fig_bb.update_layout(
+                xaxis_title="Date",
+                yaxis_title="Price (USD)",
+                template="plotly_dark",
+                margin=dict(l=0, r=0, t=30, b=0),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            )
+            st.plotly_chart(fig_bb, use_container_width=True)
         
         # Add a raw data expander for transparency
         with st.expander("View Raw Historical Data"):
