@@ -1,14 +1,11 @@
-# Python cache
-__pycache__/
+node_modules/
+.yfinance-cache/
 
-# Jupyter notebook checkpoints
-.ipynb_checkpoints/
+data/state.json
 
-# Virtual environment
-.venv/
+stock_agent_prototype/__pycache__/
+stock_agent_prototype/*.joblib
+stock_agent_prototype/*_test_signals.csv
 
-# Model files (optional but recommended)
-*.pkl
-
-# System files
 .DS_Store
+Thumbs.db

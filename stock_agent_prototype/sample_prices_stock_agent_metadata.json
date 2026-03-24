@@ -1,0 +1,44 @@
+{
+  "ticker": "sample_prices",
+  "model": "gradient_boosting",
+  "features": [
+    "return_1d",
+    "return_5d",
+    "ma_5",
+    "ma_10",
+    "ma_20",
+    "ma_gap_5_20",
+    "volatility_10",
+    "rsi_14",
+    "macd",
+    "macd_signal",
+    "bb_high",
+    "bb_low",
+    "bb_width",
+    "volume_change"
+  ],
+  "threshold": 0.55,
+  "backtest_summary": {
+    "market_total_return": 0.27241024015217463,
+    "strategy_total_return": 0.27915031032651787,
+    "strategy_annualized_return": 1.942524598714709,
+    "strategy_annualized_volatility": 0.13884655101247784,
+    "strategy_sharpe_like": 13.98987751292331,
+    "max_drawdown": -0.058017319774957236,
+    "trades": 6
+  },
+  "walk_forward_summary": {
+    "mean_accuracy": 0.625531914893617,
+    "std_accuracy": 0.14528371133998496,
+    "folds": 5
+  },
+  "diagnostics": {
+    "train_accuracy": 0.9254385964912281,
+    "test_accuracy": 0.7758620689655172,
+    "majority_baseline_accuracy": 0.6896551724137931,
+    "train_positive_rate": 0.5043859649122807,
+    "test_positive_rate": 0.6896551724137931,
+    "generalization_gap": 0.14957652752571082,
+    "diagnosis": "distribution shift risk: class balance changes noticeably between train and test periods"
+  }
+}

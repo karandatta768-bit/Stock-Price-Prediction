@@ -1,0 +1,11 @@
+{
+  "name": "multi-market-trading-agent",
+  "version": "0.1.0",
+  "description": "Messaging-first trading agent scaffold for US and Indian equities.",
+  "type": "module",
+  "scripts": {
+    "start": "node src/run-dashboard.js",
+    "dashboard": "node src/run-dashboard.js",
+    "test": "node --test --test-isolation=none"
+  }
+}

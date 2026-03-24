@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stock Agent Mobile</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Phone-ready prototype</p>
+        <h1>Stock Agent Mobile</h1>
+        <p class="lede">Run the prediction prototype from your computer and open it on your phone browser on the same Wi-Fi.</p>
+      </div>
+      <div class="hero-card">
+        <p class="hero-label">Open from your phone</p>
+        <p class="hero-url">http://{{ local_ip }}:5000</p>
+        <p class="hero-note">If that address does not open, allow Python through Windows Firewall and keep both devices on the same network.</p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <form method="post" class="form-grid">
+        <div class="field">
+          <label for="mode">Data Source</label>
+          <select id="mode" name="mode">
+            <option value="csv" {% if form_data.mode == 'csv' %}selected{% endif %}>Local CSV</option>
+            <option value="ticker" {% if form_data.mode == 'ticker' %}selected{% endif %}>Yahoo Ticker</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="ticker">Ticker</label>
+          <input id="ticker" name="ticker" value="{{ form_data.ticker }}" placeholder="AAPL">
+        </div>
+
+        <div class="field field-wide">
+          <label for="csv_path">CSV Path</label>
+          <input id="csv_path" name="csv_path" value="{{ form_data.csv_path }}" placeholder="{{ default_csv }}">
+        </div>
+
+        <div class="field">
+          <label for="start">Start</label>
+          <input id="start" name="start" value="{{ form_data.start }}" placeholder="2020-01-01">
+        </div>
+
+        <div class="field">
+          <label for="end">End</label>
+          <input id="end" name="end" value="{{ form_data.end }}" placeholder="2025-01-01">
+        </div>
+
+        <div class="field">
+          <label for="threshold">Threshold</label>
+          <input id="threshold" name="threshold" value="{{ form_data.threshold }}" placeholder="0.55">
+        </div>
+
+        <div class="field">
+          <label for="cost_bps">Cost (bps)</label>
+          <input id="cost_bps" name="cost_bps" value="{{ form_data.cost_bps }}" placeholder="5">
+        </div>
+
+        <div class="field">
+          <label for="test_size">Test Size</label>
+          <input id="test_size" name="test_size" value="{{ form_data.test_size }}" placeholder="0.2">
+        </div>
+
+        <div class="field">
+          <label for="cv_splits">CV Splits</label>
+          <input id="cv_splits" name="cv_splits" value="{{ form_data.cv_splits }}" placeholder="5">
+        </div>
+
+        <button class="submit" type="submit">Run Analysis</button>
+      </form>
+    </section>
+
+    {% if error %}
+    <section class="panel error-panel">
+      <h2>Problem</h2>
+      <p>{{ error }}</p>
+    </section>
+    {% endif %}
+
+    {% if result %}
+    <section class="result-grid">
+      <article class="panel signal-panel">
+        <p class="eyebrow">Latest signal</p>
+        <h2 class="signal {{ result.latest.signal|lower }}">{{ result.latest.signal }}</h2>
+        <p class="metric-large">{{ "%.2f"|format(result.latest.confidence * 100) }}% confidence</p>
+        <p class="reason">{{ result.latest.reason }}</p>
+      </article>
+
+      <article class="panel">
+        <p class="eyebrow">Dataset</p>
+        <div class="stats">
+          <div><span>Source</span><strong>{{ result.source }}</strong></div>
+          <div><span>Rows</span><strong>{{ result.rows }}</strong></div>
+          <div><span>Train</span><strong>{{ result.train_start }} to {{ result.train_end }}</strong></div>
+          <div><span>Test</span><strong>{{ result.test_start }} to {{ result.test_end }}</strong></div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <p class="eyebrow">Validation</p>
+        <div class="stats">
+          <div><span>Accuracy</span><strong>{{ "%.2f"|format(result.accuracy * 100) }}%</strong></div>
+          <div><span>WF Mean</span><strong>{{ "%.2f"|format(result.walk_forward.mean_accuracy * 100) }}%</strong></div>
+          <div><span>WF Std</span><strong>{{ "%.2f"|format(result.walk_forward.std_accuracy * 100) }}%</strong></div>
+          <div><span>Folds</span><strong>{{ result.walk_forward.folds }}</strong></div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <p class="eyebrow">Backtest</p>
+        <div class="stats">
+          <div><span>Strategy Return</span><strong>{{ "%.2f"|format(result.backtest.strategy_total_return * 100) }}%</strong></div>
+          <div><span>Market Return</span><strong>{{ "%.2f"|format(result.backtest.market_total_return * 100) }}%</strong></div>
+          <div><span>Max Drawdown</span><strong>{{ "%.2f"|format(result.backtest.max_drawdown * 100) }}%</strong></div>
+          <div><span>Trades</span><strong>{{ result.backtest.trades }}</strong></div>
+        </div>
+      </article>
+
+      <article class="panel feature-panel">
+        <p class="eyebrow">Top Features</p>
+        <div class="feature-list">
+          {% for name, value in result.latest.top_features.items() %}
+          <div class="feature-item">
+            <span>{{ name }}</span>
+            <strong>{{ value }}</strong>
+          </div>
+          {% endfor %}
+        </div>
+      </article>
+
+      <article class="panel table-panel">
+        <p class="eyebrow">Recent Signals</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Signal</th>
+                <th>Prob Up</th>
+                <th>Actual</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in result.recent_signals %}
+              <tr>
+                <td>{{ row.date.strftime("%Y-%m-%d") if row.date.strftime else row.date }}</td>
+                <td>{{ row.signal }}</td>
+                <td>{{ "%.3f"|format(row.prob_up) }}</td>
+                <td>{{ row.target }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if result.export_path %}
+        <p class="export-note">Signals exported to {{ result.export_path }}</p>
+        {% endif %}
+      </article>
+    </section>
+    {% endif %}
+  </main>
+</body>
+</html>
